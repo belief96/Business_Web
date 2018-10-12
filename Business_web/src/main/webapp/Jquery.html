@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="static/jquery-3.3.1.min.js"></script>
+
+</head>
+<body>
+
+<script>
+    $(function () {
+
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8080/Business_web/user",
+            data:{"operation":"1","username":"adas","pwd":"123456"},
+            async:true,
+            dataType:"json",
+            success:function(date){
+               /* var obj=JSON.parse(date);*/
+                alert(date.username);
+            }
+        });
+
+    });
+
+
+
+
+
+</script>
+
+</body>
+</html>

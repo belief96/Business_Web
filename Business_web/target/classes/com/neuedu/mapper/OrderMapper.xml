@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2009-2017 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.dao.IOrderDao">
+
+    <select id="findOrderByOrderNoAndUserid" parameterType="map" resultType="order">
+        SELECT id,user_id,order_no,shopping_id,payment,payment_type,postage,payment_time,status,send_time,end_time,close_time,create_time,update_time
+        from neuedu_order
+        where user_id=#{userid} and order_no=#{orderno}
+    </select>
+
+    <select id="findOrderByOrderNo" parameterType="map" resultType="order">
+        SELECT id,user_id,order_no,shopping_id,payment,payment_type,postage,payment_time,status,send_time,end_time,close_time,create_time,update_time
+        from neuedu_order
+        where order_no=#{orderno}
+    </select>
+
+    <update id="updateOrderStatusByOrderNo" parameterType="map">
+        UPDATE neuedu_order set status=#{status}
+        WHERE order_no=#{orderno}
+    </update>
+
+<insert id="addPayInfo" parameterType="payInfo">
+    INSERT INTO neuedu_pay_info(user_id,order_no,pay_platform,platform_number,platform_status,create_time,update_time)
+    VALUES (#{user_id},#{order_no},#{pay_platform},#{platform_number},#{platform_status},now(),now())
+</insert>
+
+    <insert id="addOrder" parameterType="order">
+        INSERT INTO neuedu_order(user_id,order_no,shopping_id,payment,postage,status,create_time,update_time)
+        VALUES (#{user_id},#{order_no},#{shopping_id},#{payment},#{postage},#{status},now(),now())
+    </insert>
+
+
+
+    <insert id="barchInsertOrderItem" parameterType="list">
+        INSERT INTO neuedu_order_item(user_id,order_no,product_id,product_name,product_image,current_unit_price,quantity,total_price,create_time,update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.user_id},#{item.order_no},#{item.product_id},#{item.product_name},#{item.product_image},#{item.current_unit_price},#{item.quantity},#{item.total_price},now(),now())
+        </foreach>
+    </insert>
+
+
+    <update id="updateOrderStatusByOrderNoAndUserid" parameterType="map">
+        UPDATE neuedu_order set status=#{status}
+        WHERE order_no=#{orderno} and user_id=#{userid}
+    </update>
+
+
+    <update id="sendOrder" parameterType="order">
+        UPDATE neuedu_order set status=#{status},send_time=now()
+        WHERE order_no=#{order_no}
+    </update>
+
+    <select id="orderList" parameterType="map" resultType="order">
+        select *
+        from neuedu_order
+        where user_id = #{userId}
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id="totalPage" parameterType="int" resultType="long">
+        select count(1)
+        from neuedu_order
+        where user_id = #{userId}
+    </select>
+
+    <select id="findOrderItemByOrderNo" parameterType="map" resultType="order">
+        SELECT user_id,order_no,shopping_id,payment,payment_type,postage,payment_time,status,send_time,end_time,close_time,create_time,update_time
+        from neuedu_order
+        where order_no=#{orderno}
+    </select>
+
+</mapper>

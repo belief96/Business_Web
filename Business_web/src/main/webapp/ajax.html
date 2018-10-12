@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body onload="adad()">
+
+<script>
+    function adad(){
+    var  xmlhttp;
+    if (window.XMLHttpRequest){
+         xmlhttp=new XMLHttpRequest();
+    }else{
+        xmlhttp=new ActiveXObject();
+    }
+    xmlhttp.open("GET",
+        "http://localhost:8080/Business_web/user?operation=1&username=adas&pwd=123456",
+        true
+    );
+    //发送请求
+    xmlhttp.send();
+   //监听请求，响应的数据
+    xmlhttp.onreadystatechange=function(){
+        if(xmlhttp.readyState==4&&xmlhttp.status==200){
+            //将json转成js格式
+            var obj=JSON.parse(xmlhttp.responseText);
+         //alert(obj);
+           document.getElementById("date").innerHTML=obj.username;
+        }
+    }
+    }
+</script>
+
+<span id="date"></span>
+</body>
+</html>

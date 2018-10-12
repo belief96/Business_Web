@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2009-2017 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.dao.IProductDao">
+
+    <resultMap id="productMap" type="product" autoMapping="true">
+        <!--主键映射-->
+        <id column="productid" property="id"></id>
+        <result column="pname" property="name"></result>
+        <!--一对一映射-->
+        <association property="category" column="categoryid" javaType="com.neuedu.pojo.Category" autoMapping="true">
+            <id column="categoryid" property="id"></id>
+            <result column="cname" property="name"></result>
+            <result column="c_c_t" property="create_time"></result>
+            <result column="c_u_t" property="update_time"></result>
+        </association>
+    </resultMap>
+
+    <select id="findProductById" parameterType="int" resultMap="productMap">
+
+    select p.id productid,p.category_id,p.name pname,p.subtitle,p.main_images,p.sub_images,p.price,p.stock,p.status,p.create_time,p.update_time,
+      c.id categoryid,c.parent_id,c.name cname,c.status,c.sort_order,c.create_time c_c_t,c.update_time c_u_t
+      from neuedu_product p
+      left JOIN neuedu_category c
+      ON p.category_id=c.id
+      WHERE p.id=#{productid};
+</select>
+
+    <insert id="addProduct" parameterType="product" useGeneratedKeys="true" keyColumn="id">
+        INSERT INTO neuedu_product(category_id,name,subtitle,main_images,sub_images,detayl,price,stock,status,create_time,update_time)
+        VALUES (#{category_id},#{name},#{subtitle},#{main_images},#{sub_images},#{detayl},#{price},#{stock},#{status},now(),now());
+
+    </insert>
+
+    <update id="updateProduct" parameterType="product">
+
+        UPDATE neuedu_product
+
+        <set>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="subtitle!=null">
+                subtitle=#{subtitle},
+            </if>
+            <if test="main_images!=null">
+                main_images=#{main_images},
+            </if>
+            <if test="sub_images!=null">
+                sub_images=#{sub_images},
+            </if>
+            <if test="detayl!=null">
+                detayl=#{detayl},
+            </if>
+            <if test="price!=null">
+                price=#{price},
+            </if>
+            <if test="stock!=null">
+                stock=#{stock},
+            </if>
+            <if test="status!=null">
+                status=#{status},
+            </if>
+        </set>
+
+        <where>
+            id=#{id}
+        </where>
+
+    </update>
+    
+    
+   <select id="findProductByPageNo" parameterType="map" resultType="product">
+
+       select id,category_id,name,subtitle,main_images,sub_images,price,stock,status,create_time,update_time
+      from neuedu_product
+       limit #{offSet},#{pageSize}
+
+   </select>
+
+
+    <select id="findTotalRecord" resultType="long">
+
+        SELECT count(1) from neuedu_product
+    </select>
+
+    <select id="findPrdouctByPrdouctIdOrProductName" parameterType="map" resultType="product">
+        select id,category_id,name,subtitle,main_images,sub_images,price,stock,status,create_time,update_time
+        FROM neuedu_product
+        <where>
+            <if test="productId!=null">
+                and id=#{productId}
+            </if>
+            <if test="productName!=null">
+                and name LIKE #{productName}
+            </if>
+        </where>
+
+        limit #{offSet},#{pageSize}
+
+    </select>
+
+    <select id="findTotalRecordByIdOrByName" resultType="long" parameterType="map">
+
+        SELECT count(1) from neuedu_product
+        <where>
+            <if test="productId!=null">
+                and id=#{productId}
+            </if>
+            <if test="productName!=null">
+                and name LIKE #{productName}
+            </if>
+        </where>
+    </select>
+
+    <select id="findProductByIdAndOnline" parameterType="int" resultType="product">
+        select id,category_id,name,subtitle,main_images,sub_images,price,stock,status,create_time,update_time
+        FROM neuedu_product
+        <where>
+            id=#{productid} and status=1
+        </where>
+
+
+    </select>
+
+
+
+    <select id="findProductBycategoryIdsAndProductName" parameterType="map" resultType="product">
+        select id,category_id,name,subtitle,main_images,sub_images,price,stock,status,create_time,update_time
+        FROM neuedu_product
+        <where>
+            status=1
+            <if test="categoryIds!=null and categoryIds.size>0">
+
+                and category_id in
+                <foreach collection="categoryIds" item="categoryid" open="(" close=")" separator=",">
+                  #{categoryid}
+                </foreach>
+            </if>
+
+            <if test="productName!=null">
+                  and name like #{productName}
+            </if>
+        </where>
+        <if test="orderby==1">
+            ORDER BY price asc
+        </if>
+        <if test="orderby==2">
+            ORDER BY price desc
+        </if>
+
+        limit #{pageNo},#{pageSize}
+
+    </select>
+
+
+
+    <select id="findTotalRecordCategoryIdsAndproductName" parameterType="map" resultType="long">
+        SELECT count(1) from neuedu_product
+        <where>
+            status=1
+            <if test="categoryIds!=null and categoryIds.size>0">
+
+                and category_id in
+                <foreach collection="categoryIds" item="categoryid" open="(" close=")" separator=",">
+                    #{categoryid}
+                </foreach>
+            </if>
+
+            <if test="productName!=null">
+                and name like #{productName}
+            </if>
+        </where>
+
+    </select>
+
+
+</mapper>
